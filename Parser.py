@@ -110,6 +110,17 @@ def Crawler(url):
 
     file_craw.close()
 
+    # Обращение к внешнему объекту elasticsearchCrawlerClient
+    # try:
+    #     record = elasticsearchCrawlerClient.contains(url)
+    # except Exception:
+    #     print('Ошибка')
+    # else:
+    #     print('Ошибки нет')
+    # finally:
+    #     if record is False:
+    #         elasticsearchCrawlerClient.put(url, contentText, dateText, tagText)
+    #         print('Данные успешно ззаписаны')
 
 
 NewArticleUrl('http://www.rosenergoatom.ru/zhurnalistam/novosti-otrasli/')
