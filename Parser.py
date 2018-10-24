@@ -1,8 +1,21 @@
+from proxy_getter import get_viable_proxy_list
+from proxy_getter import get_html_proxy
 import requests
 import time
+import random
+import os
 from bs4 import BeautifulSoup
 
+def get_html(url, user_agent, proxy):
+	# при выполнении get получаем ответ Response 200. Это означает что все ок.
+	r = requests.get(url, timeout = None, proxies = {'': proxy})
+	return r.text
+
 def NewArticleUrl(start_url):
+    time.sleep(round(abs(random.gauss(1.5, 1) + random.random() / 10 + random.random() / 100), 4))
+    useragent = {'User-Agent': random.choice(list_of_user_agents)}
+    proxy = {'http': random.choice(list_of_viable_proxies)}
+
     # header = {'User-Agent':'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0'}
     web_url = "%s%s" % (start_url, '29278?PAGEN_1=')
     file_craw = open("craw_rosenergoatom.txt", "w")
@@ -12,9 +25,9 @@ def NewArticleUrl(start_url):
 
     while (count >= 0):
         page_url = "%s%s" % (web_url, count)
-        code = requests.get(page_url)
-        plain = code.text
-        s = BeautifulSoup(plain, "html.parser")
+        code = get_html(page_url, useragent, proxy)
+        # plain = code.text
+        s = BeautifulSoup(code, "html.parser")
         count -= 1
 
         for a in s.findAll('p', {'class':'news-item'}):
@@ -29,7 +42,11 @@ def NewArticleUrl(start_url):
 
 
 def OldArticleUrl(start_url):
-    header = {'User-Agent':'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0'}
+    time.sleep(round(abs(random.gauss(1.5, 1) + random.random() / 10 + random.random() / 100), 4))
+    useragent = {'User-Agent': random.choice(list_of_user_agents)}
+    proxy = {'http': random.choice(list_of_viable_proxies)}
+
+    # header = {'User-Agent':'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0'}
     web_url = "%s%s" % (start_url, '?PAGEN_1=')
     file_craw = open("craw_rosenergoatom.txt", "a")
     file_craw.close()
@@ -38,18 +55,19 @@ def OldArticleUrl(start_url):
 
     # Определение кол-ва страниц
     url_pages = "%s%s" % (web_url, 0)
-    code_pages = requestGet(url_pages)
+    code_pages = get_html(url_pages, useragent, proxy)
     # code_pages = requests.get(url_pages, headers=header)
-    soup_page = BeautifulSoup(code_pages.text, "html.parser")
+    soup_page = BeautifulSoup(code_pages, "html.parser")
     pages = soup_page.find('a',{'class':'modern-page-dots'}).find_next_sibling('a')
 
 
     while (count <= int(pages.text)):
         page_url = "%s%s" % (web_url, count)
         # code = requests.get(page_url)
-        code = requestGet(page_url)
-        plain = code.text
-        s = BeautifulSoup(plain, "html.parser")
+        # code = requestGet(page_url)
+        code = get_html(page_url, useragent, proxy)
+        # plain = code.text
+        s = BeautifulSoup(code, "html.parser")
         count += 1
         head = s.findAll('div', {'class':'news-list'})[2]
 
@@ -65,10 +83,15 @@ def OldArticleUrl(start_url):
 
 
 def Crawler(url):
+    time.sleep(round(abs(random.gauss(1.5, 1) + random.random() / 10 + random.random() / 100), 4))
+    useragent = {'User-Agent': random.choice(list_of_user_agents)}
+    proxy = {'http': random.choice(list_of_viable_proxies)}
+
     # header = {'User-Agent':'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0'}
     # code = requests.get(url)
-    code = requestGet(url)
-    soup = BeautifulSoup(code.text, "html.parser")
+    # code = requestGet(url)
+    code = get_html(url, useragent, proxy)
+    soup = BeautifulSoup(code, "html.parser")
     file_craw = open("craw_rosenergoatom.txt", mode='a', encoding='utf8')
     print(url)
 
@@ -132,31 +155,18 @@ def Crawler(url):
 
 
 
-def requestGet(url):
-    while True:
-        try:
-            rs = requests.get(url)
-            if rs.status_code != 200:
-                print("Ошибка, Код ответа: %s", rs.status)
-                time.sleep(30)
-
-                # Попробуем снова на следующей итерации цикла
-                continue
-
-            # Если дошли до сюда, значит ошибок не было
-            return rs
-
-        except ConnectionError:
-            print("Ошибка ConnectionError")
-            time.sleep(1)
-
-
+list_of_viable_proxies = get_viable_proxy_list(get_html_proxy('https://www.ip-adress.com/proxy-list'), 10)
+cur_dir = os.path.dirname(__file__)
+useragent_filename = os.path.join(cur_dir, 'useragents.txt')
+list_of_user_agents = open(useragent_filename).read().split('\n')
 
 # Подсчет кол-ва статей
 numberArticle = 0
 
-# NewArticleUrl('http://www.rosenergoatom.ru/zhurnalistam/novosti-otrasli/')
+# Статьи за 2017-2018
+NewArticleUrl('http://www.rosenergoatom.ru/zhurnalistam/novosti-otrasli/')
 
+# Статьи за 2010-2016
 year = 2010
 while (year <= 2016):
     old_url = 'http://www.rosenergoatom.ru/zhurnalistam/news-archive/'
