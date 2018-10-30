@@ -6,9 +6,9 @@ import random
 import os
 from bs4 import BeautifulSoup
 
-def get_html(url, user_agent, proxy):
+def get_html(url, useragent, proxy):
 	# при выполнении get получаем ответ Response 200. Это означает что все ок.
-	r = requests.get(url, timeout = None, proxies = {'': proxy})
+	r = requests.get(url, timeout = None, headers = useragent, proxies = {'': proxy})
 	return r.text
 
 def NewArticleUrl(start_url):
@@ -16,7 +16,6 @@ def NewArticleUrl(start_url):
     useragent = {'User-Agent': random.choice(list_of_user_agents)}
     proxy = {'http': random.choice(list_of_viable_proxies)}
 
-    # header = {'User-Agent':'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0'}
     web_url = "%s%s" % (start_url, '29278?PAGEN_1=')
     file_craw = open("craw_rosenergoatom.txt", "w")
     file_craw.close()
@@ -26,7 +25,6 @@ def NewArticleUrl(start_url):
     while (count >= 0):
         page_url = "%s%s" % (web_url, count)
         code = get_html(page_url, useragent, proxy)
-        # plain = code.text
         s = BeautifulSoup(code, "html.parser")
         count -= 1
 
@@ -46,7 +44,6 @@ def OldArticleUrl(start_url):
     useragent = {'User-Agent': random.choice(list_of_user_agents)}
     proxy = {'http': random.choice(list_of_viable_proxies)}
 
-    # header = {'User-Agent':'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0'}
     web_url = "%s%s" % (start_url, '?PAGEN_1=')
     file_craw = open("craw_rosenergoatom.txt", "a")
     file_craw.close()
@@ -56,17 +53,13 @@ def OldArticleUrl(start_url):
     # Определение кол-ва страниц
     url_pages = "%s%s" % (web_url, 0)
     code_pages = get_html(url_pages, useragent, proxy)
-    # code_pages = requests.get(url_pages, headers=header)
     soup_page = BeautifulSoup(code_pages, "html.parser")
     pages = soup_page.find('a',{'class':'modern-page-dots'}).find_next_sibling('a')
 
 
     while (count <= int(pages.text)):
         page_url = "%s%s" % (web_url, count)
-        # code = requests.get(page_url)
-        # code = requestGet(page_url)
         code = get_html(page_url, useragent, proxy)
-        # plain = code.text
         s = BeautifulSoup(code, "html.parser")
         count += 1
         head = s.findAll('div', {'class':'news-list'})[2]
@@ -87,9 +80,7 @@ def Crawler(url):
     useragent = {'User-Agent': random.choice(list_of_user_agents)}
     proxy = {'http': random.choice(list_of_viable_proxies)}
 
-    # header = {'User-Agent':'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0'}
-    # code = requests.get(url)
-    # code = requestGet(url)
+
     code = get_html(url, useragent, proxy)
     soup = BeautifulSoup(code, "html.parser")
     file_craw = open("craw_rosenergoatom.txt", mode='a', encoding='utf8')
